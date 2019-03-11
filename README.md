@@ -7,4 +7,4 @@ This project is intended to:
 
 This may fail at both tasks.
 
-The aforementioned GitHub Pages site is available at [https://bsogata.github.io/ics-314-meteor-faqs](https://bsogata.github.io/ics-314-meteor-faqs).  The site uses the Minimal theme because ${insert your own joke here}.
+The aforementioned GitHub Pages site is available at [https://bsogata.github.io/ics-314-meteor-faqs](https://bsogata.github.io/ics-314-meteor-faqs).  The site uses the Minimal theme to reflect the amount of effort that the author put into some of this.
