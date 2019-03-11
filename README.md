@@ -7,4 +7,4 @@ This project is intended to:
 
 This may fail at both tasks.
 
-The aforementioned GitHub Pages site is available at [https://bsogata.github.io/ics-314-meteor-faqs](https://bsogata.github.io/ics-314-meteor-faqs).  The site uses the Midnight theme because that is when the majority of Computer Science students are actually working.
+The aforementioned GitHub Pages site is available at [https://bsogata.github.io/ics-314-meteor-faqs](https://bsogata.github.io/ics-314-meteor-faqs).  The site uses the Slate theme because that is when the majority of Computer Science students are actually working.
