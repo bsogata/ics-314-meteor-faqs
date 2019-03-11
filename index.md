@@ -9,23 +9,23 @@ This page is intended to answer questions about Meteor for ICS 314 Spring 2019<s
 4. <a href="#roles">Roles</a>
 
 ## <span id="forms">Forms</span>
-###### How does error checking work?
+#### How does error checking work?
 This course uses [Uniforms](https://github.com/vazco/uniforms) in conjunction with [Simple Schema](https://github.com/aldeed/simple-schema-js) to accomplish this; see the documentation for those tools for more details.  
 
-###### Why "Bert Alert"?
+#### Why "Bert Alert"?
 [Ask the developer](https://github.com/themeteorchef/bert/wiki/Contribution-Guide#asking-questions).  
 
-###### What options are available so the Bert alert does not block the navbar?
+#### What options are available so the Bert alert does not block the navbar?
 See the [Bert documentation](https://github.com/themeteorchef/bert/), especially the [API & Defaults](https://github.com/themeteorchef/bert/#api--defaults) and [Customization](https://github.com/themeteorchef/bert/#customization) sections.
 
-###### Dr. Johnson mentions "spinners" in [the screencast](https://youtu.be/s77Vg6hgevI), but the actual component is [`Loader`](https://react.semantic-ui.com/elements/loader/).  Why the difference?
+#### Dr. Johnson mentions "spinners" in [the screencast](https://youtu.be/s77Vg6hgevI), but the actual component is [`Loader`](https://react.semantic-ui.com/elements/loader/).  Why the difference?
 The Semantic UI developers did not want you to confuse the `Loader` component with [Spinners](https://youtu.be/4YSbGXNXfVg).
 
-###### How should we handle forgotten passwords: provide a button or link to reset the password or automatically reset the password after *n* invalid login attempts?
+#### How should we handle forgotten passwords: provide a button or link to reset the password or automatically reset the password after *n* invalid login attempts?
 These are not mutually exclusive options: you can provide the *Reset Password* link while still tracking the number of unsuccessful login attempts.  You could add an integer field to the `users` collection to store the number of consecutive failed logins and update that in `handleSubmit` in the `Signin` page.
 
 ## <span id="mongodb">MongoDB</span>
-###### How are passwords stored?  What prevents an attacker<sup><a href="#footnote-3">3</a></sup> from accessing those passwords?
+#### How are passwords stored?  What prevents an attacker<sup><a href="#footnote-3">3</a></sup> from accessing those passwords?
 If we look at the `users` collection in the MongoDB console, we see:
 
 ```
@@ -37,11 +37,11 @@ meteor:PRIMARY> db.users.find()
 In particular, note that the `password` field for the first user has a value of `{ "bcrypt" : "$2a$10$mS4VO9apDZC.Ul6U1YtfHOtgsY8JwVlCNq7muej4GgCTGTRyiW9K6" }`.  This is very clearly not the default password provided in _/config/settings.development.json_.  Storing passwords as plain text is very much a bad idea; instead, we apply a hash function to the password and store that hashed value.  When someone attempts to log in as the user, we then use the same hash function.  If the hashed value of the input matches the value stored in the database, then we are reasonably certain that the password is correct<sup><a href="#footnote-4">4</a></sup>; otherwise we know we can reject the login.
 
 ## <span id="rendering-data">Rendering Data</span>
-###### Is it possible to sort the data displayed on the page?
+#### Is it possible to sort the data displayed on the page?
 Yes, and [you have already done something like this](http://courses.ics.hawaii.edu/ics314s19/morea/mongo/experience-mongodb-shell.html).
 
 ## <span id="roles">Roles</span>
-###### How does the application differentiate between regular and admin users?
+#### How does the application differentiate between regular and admin users?
 One example of this is in _/app/imports/ui/components/Navbar.jsx_:
 
 ```
@@ -52,14 +52,11 @@ One example of this is in _/app/imports/ui/components/Navbar.jsx_:
 
 This uses the ternary operator to display the **Admin** menu item if the user is an admin and `''` otherwise.  The condition here is `Roles.userIsInRole(Meteor.userId(), 'admin')`; `Roles.userIsInRole` takes the ID of the user to examine and the role to search for as its arguments.  For more details, see [the documentation for `Roles.userIsInRole`](http://alanning.github.io/meteor-roles/classes/Roles.html#method_userIsInRole).
 
-###### How do you add new admin users without using _/config/settings.development.json_?
+#### How do you add new admin users without using _/config/settings.development.json_?
 You can add the "admin" role to an existing user through a MongoDB command, ex. `db.users.update({username: "john@foo.com"}, { $set: { roles: ["admin"] }});`.  
 
-###### Are there any roles besides "user" and "admin" in the [template](http://ics-software-engineering.github.io/meteor-application-template-react/)?
+#### Are there any roles besides "user" and "admin" in the [template](http://ics-software-engineering.github.io/meteor-application-template-react/)?
 The template only provides these two roles; these roles are ultimately just strings stored in an array field in the `users` collection though, so all you need to do in order to create new roles is decide on a name for the role and add conditional logic to perform certain actions for that role.  For more information, see [the documentation for `meteor-roles`](https://github.com/alanning/meteor-roles).  
-
-###### Will we ever need to make something like admin users?
-
 
 ## Footnotes
 <ol>
