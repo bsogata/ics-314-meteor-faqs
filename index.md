@@ -38,6 +38,12 @@ Essentially, anything covered in [Example directory layout](https://guide.meteor
 #### Is it safe to log in while already logged in?
 Yes, as far as I know.
 
+#### Can we just write HTML files in _/app/client_?
+Yes, but if you are only making static web pages with HTML and CSS there is not much point in using Meteor in the first place.
+
+#### Is the landing page basically the home page?
+Yes.
+
 ---
 
 ## <span id="data">Data and Accounts: Structure and Initialization</span>
@@ -99,6 +105,9 @@ No, by that point the values from `"defaultData"` are already in the database an
 #### Is `StuffAdmin` another database that runs alongside `Stuff`?
 No, both `Stuff` and `StuffAdmin` are publications: they contain data from the database but are not databases themselves.
 
+#### What does `withTracker` do in some of the pages (ex. _/app/imports/ui/pages/EditStuff.jsx_)?
+The `withTracker` function provides access to the necessary publications from the database through setting up subscriptions; see more details in [the official documentation](https://guide.meteor.com/react.html#using-withTracker).
+
 ---
 
 ## <span id="navigation">Navigation, Routing, Pages, and Components</span>
@@ -138,11 +147,47 @@ Even though the actual value exported from _NavBar.jsx_ is `NavBarContainer`, we
 #### Can we use object-oriented programming in Meteor?
 You already are; everything in _/app/imports/ui_ extends `React.Component`.  You could thus make a component that extends `React.Component` and have other components that inherit from the first component.
 
+#### How is a protected route different from a regular route?
+Both `ProtectedRoute` and `AdminProtectedRoute` are defined in _/app/imports/ui/layouts/App.jsx_; `ProtectedRoute` is a `Route` with additional logic to determine whether the user is logged in (the `const isLogged = Meteor.userId() !== null`).  
+
+#### How is an exact path different from a regular path?
+An exact path must be an exact match.  The `Landing` page requires that we be at _"/"_, not some other path such as _"/signin"_ that merely contains a _/_.
+
+#### The pages export `withTracker`; where is `withTracker` called?
+`withTracker` is actually called in the export itself; note the presence of parentheses for the `withTracker` function.  
+
+#### Is it possible to conditionally render parts of pages depending on whether the user is an admin or not?  
+Yes; see _/app/imports/ui/components/NavBar.jsx_ for an example.
+
+#### Can users add their own fields to the table in _/app/imports/ui/pages/ListStuff.jsx_?
+Not in the template application, no.  Actually implementing this is theoretically possible but decidedly non-trivial: adding a new document with the new field would not be a problem, but adding said document to a collection with an existing schema would cause problems.
+
+#### What happens if you remove the subscription from _/app/imports/ui/pages/ListStuff.jsx_?
+Without the subscription to `Stuff`, the _ListStuff_ page would not have access to the `Stuffs` to display.  You can test what happens in this case on your side.
+
+#### Are the `Route`, `ProtectedRoute`, and `AdminProtectedRoute` components built into Meteor?
+Look through the rest of the file: `Route` is imported from `react-router-dom` and both `ProtectedRoute` and `AdminProtectedRoute` are defined in _App.jsx_.
+
+#### What is the relationship between publications and subscriptions?  
+The publication on the server side provides the data; the subscription on the server side receives the data.  By analogy, Dr. Johnson publishes a screencast and you subscribe to it (in the form of watching the video).
+
+#### What would happen if you removed the `return this.ready()` from the publications?
+The `this.ready()` call signals that the data transfer is complete.  Without this, any subscriptions on the publications would continue to wait for data indefinitely.
+
+#### Is it possible to place the header and footer into individual pages rather than in _/app/imports/ui/layouts/App.jsx_?
+Yes, though the question itself hints at why this is a bad idea: you would have to include the header and footer in each page in your application.  Placing the header and footer in _/layouts/App.jsx_ makes the header and footer appear on every page.
+
+#### Is it possible to modify `ProtectedRoute` to only allow users with some combination of roles?
+Yes, though you would have to `&&` the clauses together yourself.
+
+#### What is the `:_id` in the `"/edit/:_id"` route?
+The `:_id` is replaced with the `_id` of the `Stuff` being edited.
+
 ---
 
 ## <span id="forms">Forms</span>
 #### How does error checking work?
-This course uses [Uniforms](https://github.com/vazco/uniforms) in conjunction with [Simple Schema](https://github.com/aldeed/simple-schema-js) to accomplish this; see the documentation for those tools for more details.  
+This course uses [Uniforms](https://github.com/vazco/uniforms) in conjunction with [Simple Schema](https://github.com/aldeed/simple-schema-js) to accomplish this; see the documentation for those tools for more details.  Essentially, Uniforms uses the schema created with Simple Schema to generate and format the form displayed on the page.
 
 #### Why "Bert Alert"?
 [Ask the developer](https://github.com/themeteorchef/bert/wiki/Contribution-Guide#asking-questions).  
@@ -168,9 +213,61 @@ This is absolutely possible; you would just have to modify the relevant _.jsx_ f
 #### Is it possible to combine the two `Meteor.publish` calls in _/app/imports/startup/server/stuff.js_ so the application only uses one subscription for `Stuffs`?
 It is certainly possible to combine the conditional logic so the `Stuff` subscription returns all `Stuffs` for admins and only the items that the user owns for non-admins.  The template application separates the publications because it displays the `Stuffs` differently on different pages: an admin may want to see all `Stuffs` or just the `Stuffs` that he or she is directly associated with.  
 
-#### How can we further customize the forms?
-See the [documentation](https://github.com/vazco/uniforms) and [assigned reading](https://blog.meteor.com/managing-forms-in-a-meteor-react-project-with-uniforms-33d60602b43a) for Uniforms.
+#### How can we further customize the forms?  Can we use CSS to add new styles to the form elements?
+See the [documentation](https://github.com/vazco/uniforms) and [assigned reading](https://blog.meteor.com/managing-forms-in-a-meteor-react-project-with-uniforms-33d60602b43a) for Uniforms; in particular, note that you are not restricted to only text fields and dropdowns.  You may also use _/app/client/style.css_ (or any other _.css_ file that you import) to style the elements in the form. 
 
+#### Is it possible to validate the `AutoForm` without the fake username?
+Try moving the `const owner` line from `submit` to `render` and setting the `value` of the `HiddenField` to `{ owner }`.
+
+#### _/app/imports/ui/pages/AddStuff.jsx_ defines `insertCallback` and `submit` methods with parameters, but those parameters are not provided when the method is used.  How does the method receive those parameters?
+The methods are used as follows:
+
+```
+<AutoForm ref={(ref) => { this.formRef = ref; }} schema={StuffSchema} onSubmit={this.submit}>
+```
+
+```
+Stuffs.insert({ name, quantity, condition, owner }, this.insertCallback);
+```  
+
+In both cases, the method is not actually called at that point: `this.submit` is set as the handler for the `onSubmit` event and `this.insertCallback` is passed as an argument to `Stuffs.insert`.  As you will recall from the functional programming module earlier in the semester, functions are data in JavaScript and so you can store them in variables, pass them as arguments to other functions, etc.  The methods are actually called at some other time within the code for `AutoForm` and `Collection#insert` respectively.
+
+#### Are there any restrictions on the components we can create?
+None that I am aware of.
+
+#### Where does the `error` in _/app/imports/ui/pages/EditStuff.jsx_ come from?
+The code referenced is:
+
+```
+(error) => (error ?
+        Bert.alert({ type: 'danger', message: `Update failed: ${error.message}` }) :
+        Bert.alert({ type: 'success', message: 'Update succeeded' }))
+```
+
+This is an arrow function, so `error` is the parameter for the function defined here.  The function is not being called, only defined.  For a complete look at how this function is used:
+
+```
+submit(data) {
+  const { name, quantity, condition, _id } = data;
+  Stuffs.update(_id, { $set: { name, quantity, condition } }, (error) => (error ?
+      Bert.alert({ type: 'danger', message: `Update failed: ${error.message}` }) :
+      Bert.alert({ type: 'success', message: 'Update succeeded' })));
+}
+```
+
+So the arrow function (with `error` as its parameter) is passed as an argument to `Stuffs.update`.
+
+#### Is it possible to filter the range of possible inputs based on a specific set of valid values?
+If you want to restrict the range of inputs, it is best to design the form to only allow those specific inputs rather than waiting until the user submits the form to perform validation.  If the input is a string, use [a dropdown](https://react.semantic-ui.com/modules/dropdown/#types-search-selection-two); if the input is a number, use [a number field](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_input_number), etc.
+
+#### How does the Uniforms package save the form data into the database?
+The `onSubmit` attribute for the `AutoForm` component indicates the code to execute when the form is submitted.  In both _/app/imports/ui/pages/AddStuff.jsx_ and _/app/imports/ui/pages/EditStuff.jsx_, `onSubmit` is set to `this.submit`, referring to a `submit` method defined within the class.  This `submit` function takes care of the database operations.
+
+#### Can we perform more specific validations, ex. limiting the name to only alphanumeric characters?
+Yes, though this would likely require you to use [regular expressions](https://blog.codinghorror.com/regular-expressions-now-you-have-two-problems/) (and not just [the constants referenced in the Simple Schema documentation](https://github.com/aldeed/simple-schema-js#regex)).
+
+#### Does `input` prevent users from overflowing the input to gain admin access?  
+No, though the type of vulnerability you are referring to would be attacked through a different route.
 
 ---
 
@@ -207,6 +304,12 @@ Absolutely; we have an **Ethics in Software Engineering** module later in the se
 #### What prevents users from changing their own roles, ex. a regular user changing his or her role to be an admin?
 Mostly the fact that not even admins can make new admins in the template application.  If you add that functionality in, you can use `AdminProtectedRoute` from _/app/imports/ui/layouts/App.jsx_ to prevent standard users from accessing pages that only admins should have access to.
 
+#### Does Meteor support group roles for users?
+Yes, though it is more accurate to write that `meteor/alanning:roles` provides this; documentation is available [here](https://github.com/alanning/meteor-roles).
+
+#### What prevents users from accessing admin pages?  
+_/app/imports/ui/layouts/App.jsx_ uses `AdminProtectedRoute` for the admin page.  `AdminProtectdRoute` redirects the user to the signin page if the current user is not an admin (the `isLogged && isAdmin`).  Consequently, the current user must be an admin to access the page even if the user has typed in the URL of the admin page manually.
+
 ---
 
 ## <span id="misc">Miscellaneous Questions</span>
@@ -215,6 +318,12 @@ See the [Meteor showcase](https://www.meteor.com/showcase), though the most impo
 
 #### What is a hook function?
 See [the answers to this Stack Overflow question](https://stackoverflow.com/q/467557); this should not be confused with [hooking](https://youtu.be/HxCIYUBT5-A).
+
+#### How can we easily know what Semantic UI tools are available to us?
+See the [Semantic UI React documentation](https://react.semantic-ui.com/).
+
+#### How difficult would it be to use another UI framework in Meteor?  
+In theory, not very difficult; in the worst-case scenario where the framework cannot be installed through _npm_ it will still be possible to add the `link` tags into _/app/client/main.html_ manually.
 
 ---
 
@@ -225,73 +334,27 @@ See [the answers to this Stack Overflow question](https://stackoverflow.com/q/46
 
 #### Why the split between _/client_ and _/server_?  Why not make all data visible on both sides?
 
-
-#### How is a protected route different from a regular route?
-
-#### How is an exact path different from a regular path?
-An exact path must be an exact match.  The `Landing` page requires that we be at _"/"_, not some other path such as _"/signin"_ that merely contains a _/_.
-
 #### What is the relationship between _/app/client/main.html_, _/app/imports/startup/client/startup.jsx_, and _/app/imports/ui/layouts/App.jsx_?
-
-#### The pages export `withTracker`; where is `withTracker` called?
-`withTracker` is actually called in the export itself; note the presence of parentheses for the `withTracker` function.  
-
-#### Is it possible to conditionally render parts of pages depending on whether the user is an admin or not?  
-Yes; see _/app/imports/ui/components/NavBar.jsx_ for an example.
-
-#### Can users add their own fields to the table in _/app/imports/ui/pages/ListStuff.jsx_?
-Not in the template application, no.  Actually implementing this is theoretically possible but decidedly non-trivial: adding a new document with the new field would not be a problem, but adding said document to a collection with an existing schema would cause problems.
-
-#### What happens if you remove the subscription from _/app/imports/ui/pages/ListStuff.jsx_?
-Without the subscription to `Stuff`, the _ListStuff_ page would not have access to the `Stuffs` to display.  You can test what happens in this case on your side.
 
 #### How does the `<Switch>` statement work in _/app/imports/ui/layouts/App.jsx_?
 
-#### Are the `Route`, `ProtectedRoute`, and `AdminProtectedRoute` components built into Meteor?
-Look through the rest of the file: `Route` is imported from `react-router-dom` and both `ProtectedRoute` and `AdminProtectedRoute` are defined in _App.jsx_.
-
 #### How exactly does `ProtectedRoute` create a new route?
-
-#### How difficult would it be to use another UI framework in Meteor?  
-In theory, not very difficult; in the worst-case scenario where the framework cannot be installed through _npm_ it will still be possible to add the `link` tags into _/app/client/main.html_ manually.
-
-#### Can we just write HTML files in _/app/client_?
-Yes, but if you are only making static web pages with HTML and CSS there is not much point in using Meteor in the first place.
-
-#### Is the landing page basically the home page?
-Yes.
-
-#### What would happen if you removed the `return this.ready()` from the publications?
-The `this.ready()` call signals that the data transfer is complete.  Without this, any subscriptions on the publications would continue to wait for data indefinitely.
-
-#### _/app/client/main.js_ imports _/app/imports/startup/both_, which imports _/app/imports/api/stuff_.  Why not have _/app/client/main.js_ directly import _/app/imports/api/stuff_?  
-_/app/imports/startup/both_ includes files that are required on both the client and server side.  If we skip _/both_ in favor of directly importing files on the client side we would have to do the same on the server side as well, leaving us with duplicate and redundant groups of `import` statements. 
-
-#### What is the relationship between publications and subscriptions?  
-The publication on the server side provides the data; the subscription on the server side receives the data.  By analogy, Dr. Johnson publishes a screencast and you subscribe to it (in the form of watching the video).
-
-#### Are there any restrictions on the components we can create?
-None that I am aware of.
 
 #### What does the `render` function do?
 
 #### How do you generate the URL of a `Stuff`?
 
-#### Is it possible to place the header and footer into individual pages rather than in _/app/imports/ui/layouts/App.jsx_?
-Yes, though the question itself hints at why this is a bad idea: you would have to include the header and footer in each page in your application.  Placing the header and footer in _/layouts/App.jsx_ makes the header and footer appear on every page.
-
 #### Why do we split the components on a page across multiple files in Meteor when we did everything in a single file in React?
 
-#### Does Meteor support group roles for users?
-Yes, though it is more accurate to write that `meteor/alanning:roles` provides this; documentation is available [here](https://github.com/alanning/meteor-roles).
+#### If you have multiple subscriptions on a page, is it possible to wait for a set of those subscriptions to become ready before updating the page or will the page automatically update upon any change to any of the subscriptions?
 
-#### Is it possible to modify `ProtectedRoute` to only allow users with some combination of roles?
-Yes, though you would have to `&&` the clauses together yourself.
+#### What makes Meteor unique among all the web application frameworks out there?
+~~It is the only one named Meteor.~~
 
-#### How can we easily know what Semantic UI tools are available to us?
-See the [Semantic UI React documentation](https://react.semantic-ui.com/).
+#### The _Add Stuff_ and _Edit Stuff_ pages are essentially the same; why do we need two separate pages to do the same thing?
+Although the pages _look_ the same, they serve different roles.  
 
-
+#### What is the `model={this.props.doc}` attribute in the `AutoForm` in _/app/imports/ui/pages/EditStuff.jsx_?
 
 ---
 
