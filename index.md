@@ -3,47 +3,53 @@
 This page is intended to answer questions about Meteor for ICS 314 Spring 2019<sup><a href="#footnote-1">1</a></sup>.  This also serves the secondary purpose of providing an example of how to use GitHub Pages<sup><a href="#footnote-2">2</a></sup>.
 
 ## Table of Contents
-1. <a href="#forms">Forms</a>
-2. <a href="#mongodb">MongoDB</a>
-3. <a href="#project-hierarchy">Project Hierarchy</a>
-4. <a href="#rendering-data">Rendering Data</a>
-5. <a href="#roles">Roles</a>
+1. <a href="#project-structure">Walkthrough of System User Interface</a>
+2. <a href="#data">Data and Accounts: Structure and Initialization</a>
+3. <a href="#navigation">Navigation, Routing, Pages, and Components</a>
+4. <a href="#forms">Forms</a>
+5. <a href="#roles">Authorization, Authentication, and Roles</a>
+6. <a href="#misc">Miscellaneous Questions</a>
+7. <a href="#unanswered">Unanswered and Unclassified Questions</a>
 
-## <span id="forms">Forms</span>
-#### How does error checking work?
-This course uses [Uniforms](https://github.com/vazco/uniforms) in conjunction with [Simple Schema](https://github.com/aldeed/simple-schema-js) to accomplish this; see the documentation for those tools for more details.  
+## <span id="project-structure">Walkthrough of System User Interface</span>
+#### Since the initial passwords for the template are stored in plain text in _/config/settings.development.json_, should projects based on this template be stored in a private repository?
+Yes; you should make repositories private unless there is some compelling reason for them to be public.  (Those of you who took my ICS 111 will recall taking a similar approach to `public` and `private` instance variables.)
 
-#### Why "Bert Alert"?
-[Ask the developer](https://github.com/themeteorchef/bert/wiki/Contribution-Guide#asking-questions).  
+#### When should we use _.jsx_ files instead of _.js_ files and vice versa?
+In general, use _.jsx_ whenever you use (React) components in the file and _.js_ otherwise.
 
-#### What options are available so the Bert alert does not block the navbar?
-See the [Bert documentation](https://github.com/themeteorchef/bert/), especially the [API & Defaults](https://github.com/themeteorchef/bert/#api--defaults) and [Customization](https://github.com/themeteorchef/bert/#customization) sections.
+#### Do the functions (ex. `addData` in _/app/imports/startup/server/stuff.js_) have to be in specific files?
+As far as your teaching assistant knows, functions can be in any file that is `import`ed where the function is used.  However, if a function is only used on one file it makes sense to place the function in that one file.  `addData` is only used in initializing the seed data for the `Stuffs` collection, so it is located in the file that handles the `Stuffs` collection on the server side.
 
-#### Dr. Johnson mentions "spinners" in [the screencast](https://youtu.be/s77Vg6hgevI), but the actual component is [`Loader`](https://react.semantic-ui.com/elements/loader/).  Why the difference?
-The Semantic UI developers did not want you to confuse the `Loader` component with [Spinners](https://youtu.be/4YSbGXNXfVg).
+#### How does `if (this.userId) {…}` check if the user is logged in or not?  What does the `this` keyword refer to here?
+The documentation for `this.userId` is [here](https://docs.meteor.com/api/pubsub.html#Subscription-userId).  If the user is logged in, `this.userId` exists and is a truthy value.  If the user is not logged in, `this.userId` is `undefined`, which is a falsy value.
 
-#### How should we handle forgotten passwords: provide a button or link to reset the password or automatically reset the password after *n* invalid login attempts?
-These are not mutually exclusive options: you can provide the *Reset Password* link while still tracking the number of unsuccessful login attempts.  You could add an integer field to the `users` collection to store the number of consecutive failed logins and update that in `handleSubmit` in the `Signin` page.
+#### How does `if (Meteor.settings.defaultData)` work?
+As with the previous question, `Meteor.settings.defaultData` will be a truthy value if it exists and a falsy value otherwise.
 
-#### How can we validate that an email address is an actual email address?
-To verify that the string is a _valid_ email address, use [`SimpleSchema.RegEx.Email` or `SimpleSchema.RegEx.EmailWithTLD`](https://github.com/aldeed/simple-schema-js#regex).  Checking if the email address actually exists is more difficult and your teaching assistant does not have an answer to that beyond sending an email to that address.
+#### How would we make a Meteor project from scratch (that is, without using meteor-application-template-react)?  What files would we have to create?
+[You have already done something like this](http://courses.ics.hawaii.edu/ics314s19/morea/meteor-1/experience-meteor-react-tutorial.html); note though that the template basically includes everything that you would need on a site.  Most websites that are complex enough to merit using Meteor will have some sort of user accounts and data associated with those accounts.
 
-#### How can we enforce password constraints (ex. a minimum length, must contain numbers, etc.)?
-See the [Simple Schema documentation](https://github.com/aldeed/simple-schema-js#schema-rules); `min` is easy enough for the minimum length, though you may have to write a separate function to perform [custom validation](https://github.com/aldeed/simple-schema-js#custom-field-validation) or use regular expressions.
+#### Are the names of the directories significant?
+Sometimes; certainly the files in _/app/imports/startup_ should have something to do with what happens when the server starts up, _/client_ directories are only visible on the client side, _/server_ directories contain files only visible on the server side, etc.  Something like the _stuff_ directory for _/app/imports/api/stuff/stuff.js_ could be named differently though; however, we name it _stuff_ in accordance with convention and general common sense.
 
-#### How can we allow users to change their passwords?
-See the documentation for [`Accounts.changePassword`](https://docs.meteor.com/api/passwords.html#Accounts-changePassword). 
+Essentially, anything covered in [Example directory layout](https://guide.meteor.com/structure.html#example-app-structure) should be exactly as is; you have some flexibility in naming anything else.
 
-## <span id="mongodb">MongoDB</span>
+#### Is it safe to log in while already logged in?
+Yes, as far as I know.
+
+---
+
+## <span id="data">Data and Accounts: Structure and Initialization</span>
 #### How does the application remember the user accounts and other data even after terminating the Meteor process?
 When you use a computer, you have to save your work before shutting down the computer.  That data is stored in a file and you can open that file later to resume your work.  Databases serve the same purpose: your application stores data in the database so the data is preserved even after the application has closed.
 
 #### Where is all of the data stored?  
-The technically correct answer is _/app/.meteor/local/db_, though that is probably not of direct use to you since the data is not stored in a human-readable format.  Aside from a tired attempt at sarcasm, this does show that the data is in the project directory, so you do not have to worry about data from one project intermingling with data from another project<sup><a href="#footnote-4">4</a></sup>.
+The technically correct answer is _/app/.meteor/local/db_, though that is probably not of direct use to you since the data is not stored in a human-readable format.  Aside from a tired attempt at sarcasm, this does show that the data is in the project directory, so you do not have to worry about data from one project intermingling with data from another project<sup><a href="#footnote-3">3</a></sup>.
 
 The more useful answer is that you do not have to worry about where the data is stored: MongoDB takes care of preserving the data for you.
 
-#### How are passwords stored?  What prevents an attacker<sup><a href="#footnote-3">3</a></sup> from accessing those passwords?
+#### How are passwords stored?  What prevents an attacker<sup><a href="#footnote-4">4</a></sup> from accessing those passwords?
 If we look at the `users` collection in the MongoDB console, we see:
 
 ```
@@ -66,18 +72,109 @@ Yes, but it is probably not worth the time.  As noted on [the course website](ht
 #### What is the purpose of having sample data in _/config/settings.development.json_?
 We use the seed data in _/config/settings.development.json_ to populate the database the first time that we start the application.  This gives us enough data to test the application: the seed data for _meteor-application-template-react_ allows us to immediately log in and interact with the website without having to touch the MongoDB console.
 
-## <span id="rendering-data">Rendering Data</span>
+#### Can you define multiple schemas for the same collection?
+Yes; see [the `attachSchema` documentation](https://github.com/aldeed/meteor-collection2#attaching-multiple-schemas-to-the-same-collection).
+
+#### Can we expand the `users` collection to contain more data?
+Yes, just as you can change the schema for any collection.  Since `users` is built into Meteor though rather than a collection that you defined yourself, you would have to follow [a slightly different process](https://guide.meteor.com/accounts.html#custom-user-data).
+
+#### How can we enforce password constraints (ex. a minimum length, must contain numbers, etc.)?
+See the [Simple Schema documentation](https://github.com/aldeed/simple-schema-js#schema-rules); `min` is easy enough for the minimum length, though you may have to write a separate function to perform [custom validation](https://github.com/aldeed/simple-schema-js#custom-field-validation) or use regular expressions.
+
+#### How can we allow users to change their passwords?
+See the documentation for [`Accounts.changePassword`](https://docs.meteor.com/api/passwords.html#Accounts-changePassword). 
+
+#### How are passwords case-sensitive while user names are not?
+See the Meteor notes on [case sensitivity](https://guide.meteor.com/accounts.html#case-sensitivity).
+
+#### What is that `"verified" : false` in the "emails" field?  How do we change that value?
+This indicates that the email address has not been verified yet: it may be a valid email address but we do not know that it actually exists and belongs to the user.  [`Accounts.sendVerificationEmail`](https://docs.meteor.com/api/passwords.html#Accounts-sendVerificationEmail) allows us to start that verification process.
+
+#### What is the `{ tracker: Tracker }` in _/app/imports/api/stuff/stuff.js_ used for?
+`Tracker` listens for changes on your data sources; see the [Simple Schema documentation](https://github.com/aldeed/simple-schema-js#enable-meteor-tracker-reactivity) for notes on how this is integrated with Simple Schema.
+
+#### If we remove `"defaultData"` from _/config/settings.development.json_ after running the application for the first time, will those values be removed from the database?
+No, by that point the values from `"defaultData"` are already in the database and removing them from the seed data will have no impact on the database.
+
+#### Is `StuffAdmin` another database that runs alongside `Stuff`?
+No, both `Stuff` and `StuffAdmin` are publications: they contain data from the database but are not databases themselves.
+
+---
+
+## <span id="navigation">Navigation, Routing, Pages, and Components</span>
+#### The template shows how to add, edit, and show documents in a collection; how do you delete a document?
+Use [`Collection#remove`](https://docs.meteor.com/api/collections.html#Mongo-Collection-remove).
+
+#### Why do we need `export` statements for the components?  Does `import` not load in everything from the file?
+`import` is not analagous to the `#include` in C and C++: it does not insert the entire imported file.  Instead, you must export whatever you want to import in a different file.  This may seem cumbersome at first, but this system allows for more flexibility and efficiency since you only import what you actually need.  For example, you only import the Semantic UI React components that you actually use in the file, not the entire `semantic-ui-react` library.
+
+#### Why do we use `export` in some files and `export default` in others?
+As the keyword suggests, `export default` is the default export: if you do not provide a specific item to import, Meteor will import the default export.  Any other exported elements must be referred to by name.  We see an example of this in _/app/imports/ui/pages/ListStuff.jsx_:
+
+```
+import { Stuffs } from '/imports/api/stuff/stuff';
+import StuffItem from '/imports/ui/components/StuffItem';
+```
+
+`Stuffs` used `export` because _app/imports/api/stuff/stuff.js_ exports both `Stuffs` and `StuffSchema`.  `StuffItem` on the other hand was the only item exported from _/app/imports/ui/components/StuffItem_ and therefore used `export default`.  
+
+Note that the name referenced when importing a default export is irrelevant.  The `export` statement in _/app/imports/ui/components/NavBar.jsx_ is:
+
+```
+export default withRouter(NavBarContainer);
+```
+
+However, the `import` statement in _/app/imports/ui/layouts/App.jsx_ is:
+
+```
+import NavBar from '../components/NavBar';
+```
+
+Even though the actual value exported from _NavBar.jsx_ is `NavBarContainer`, we can still refer to it as `NavBar` in _App.jsx_.
+
+#### How does `publish` work?  Does it just send data from the server to the client?  When does this data transfer happen?
+'publish' defines a set of data on the server.  The subscriptions you create on the client side with `Meteor.subscribe` retrieve that data from the server to use in your components and pages.  Unlike SQL views, MongoDB will automatically update these subscriptions if the original collection is modified.
+
+#### Can we use object-oriented programming in Meteor?
+You already are; everything in _/app/imports/ui_ extends `React.Component`.  You could thus make a component that extends `React.Component` and have other components that inherit from the first component.
+
+---
+
+## <span id="forms">Forms</span>
+#### How does error checking work?
+This course uses [Uniforms](https://github.com/vazco/uniforms) in conjunction with [Simple Schema](https://github.com/aldeed/simple-schema-js) to accomplish this; see the documentation for those tools for more details.  
+
+#### Why "Bert Alert"?
+[Ask the developer](https://github.com/themeteorchef/bert/wiki/Contribution-Guide#asking-questions).  
+
+#### What options are available so the Bert alert does not block the navbar?
+See the [Bert documentation](https://github.com/themeteorchef/bert/), especially the [API & Defaults](https://github.com/themeteorchef/bert/#api--defaults) and [Customization](https://github.com/themeteorchef/bert/#customization) sections.
+
+#### Dr. Johnson mentions "spinners" in [the screencast](https://youtu.be/s77Vg6hgevI), but the actual component is [`Loader`](https://react.semantic-ui.com/elements/loader/).  Why the difference?
+The Semantic UI developers did not want you to confuse the `Loader` component with [Spinners](https://youtu.be/4YSbGXNXfVg).
+
+#### How should we handle forgotten passwords: provide a button or link to reset the password or automatically reset the password after *n* invalid login attempts?
+These are not mutually exclusive options: you can provide the *Reset Password* link while still tracking the number of unsuccessful login attempts.  You could add an integer field to the `users` collection to store the number of consecutive failed logins and update that in `handleSubmit` in the `Signin` page.
+
+#### How can we validate that an email address is an actual email address?
+To verify that the string is a _valid_ email address, use [`SimpleSchema.RegEx.Email` or `SimpleSchema.RegEx.EmailWithTLD`](https://github.com/aldeed/simple-schema-js#regex).  Checking if the email address actually exists is more difficult and your teaching assistant does not have an answer to that beyond sending an email to that address.
+
 #### Is it possible to sort the data displayed on the page?
 Yes, and [you have already done something like this](http://courses.ics.hawaii.edu/ics314s19/morea/mongo/experience-mongodb-shell.html).
 
 #### Can we combine pages together?  For example, could we merge the _Add Stuff_, _Edit Stuff_, and _List Stuff_ pages to form one _Stuff_ page where we can see the existing Stuffs as we add and modify items?
 This is absolutely possible; you would just have to modify the relevant _.jsx_ files.  Whether you _should_ do this is a philosophical question.  On one hand, combining all of the possible actions on a collection into a single page reduces the amount of navigation necessary, and seeing what is already in the collection may be useful when adding new items (ex. ensuring that you are not creating a duplicate of something already in the database).  On the other hand, doing this will put a lot of data on one page, resulting in a potentially confusing and cluttered user interface.
 
-## Project Hierarchy
-#### When should we use _.jsx_ files instead of _.js_ files and vice versa?
-In general, use _.jsx_ whenever you use (React) components in the file and _.js_ otherwise.
+#### Is it possible to combine the two `Meteor.publish` calls in _/app/imports/startup/server/stuff.js_ so the application only uses one subscription for `Stuffs`?
+It is certainly possible to combine the conditional logic so the `Stuff` subscription returns all `Stuffs` for admins and only the items that the user owns for non-admins.  The template application separates the publications because it displays the `Stuffs` differently on different pages: an admin may want to see all `Stuffs` or just the `Stuffs` that he or she is directly associated with.  
 
-## <span id="roles">Roles</span>
+#### How can we further customize the forms?
+See the [documentation](https://github.com/vazco/uniforms) and [assigned reading](https://blog.meteor.com/managing-forms-in-a-meteor-react-project-with-uniforms-33d60602b43a) for Uniforms.
+
+
+---
+
+## <span id="roles">Authorization, Authentication, and Roles</span>
 #### How does the application differentiate between regular and admin users?
 One example of this is in _/app/imports/ui/components/Navbar.jsx_:
 
@@ -104,6 +201,100 @@ After a while your machine would probably run out of memory, but other than that
 #### How can a user modify a document that he or she did not create?
 Creating data does not inherently protect it from modification by others; if you want to ensure that users can only modify their own data, you would have to add in the logic for that yourself.  
 
+#### Are there ethical concerns about having an admin user who can see all of the data on the site?
+Absolutely; we have an **Ethics in Software Engineering** module later in the semester and you might also consider ICS 390 for further discussion of ethical issues in Computer Science.  
+
+#### What prevents users from changing their own roles, ex. a regular user changing his or her role to be an admin?
+Mostly the fact that not even admins can make new admins in the template application.  If you add that functionality in, you can use `AdminProtectedRoute` from _/app/imports/ui/layouts/App.jsx_ to prevent standard users from accessing pages that only admins should have access to.
+
+---
+
+## <span id="misc">Miscellaneous Questions</span>
+#### Is Meteor used for real-life applications<sup><a href="#footnote-6">6</a></sup>?
+See the [Meteor showcase](https://www.meteor.com/showcase), though the most important example for you is clearly [RadGrad](https://www.radgrad.org/).
+
+#### What is a hook function?
+See [the answers to this Stack Overflow question](https://stackoverflow.com/q/467557); this should not be confused with [hooking](https://youtu.be/HxCIYUBT5-A).
+
+---
+
+## <span id="unanswered">Unanswered and Unclassified Questions</span>
+#### Can Meteor be used for real-time apps involving large quantities of data (ex. multiplayer games)?
+
+#### Is this publication and subscription model similar to how Google, Amazon, Facebook, etc. retrieve and display data?
+
+#### Why the split between _/client_ and _/server_?  Why not make all data visible on both sides?
+
+
+#### How is a protected route different from a regular route?
+
+#### How is an exact path different from a regular path?
+An exact path must be an exact match.  The `Landing` page requires that we be at _"/"_, not some other path such as _"/signin"_ that merely contains a _/_.
+
+#### What is the relationship between _/app/client/main.html_, _/app/imports/startup/client/startup.jsx_, and _/app/imports/ui/layouts/App.jsx_?
+
+#### The pages export `withTracker`; where is `withTracker` called?
+`withTracker` is actually called in the export itself; note the presence of parentheses for the `withTracker` function.  
+
+#### Is it possible to conditionally render parts of pages depending on whether the user is an admin or not?  
+Yes; see _/app/imports/ui/components/NavBar.jsx_ for an example.
+
+#### Can users add their own fields to the table in _/app/imports/ui/pages/ListStuff.jsx_?
+Not in the template application, no.  Actually implementing this is theoretically possible but decidedly non-trivial: adding a new document with the new field would not be a problem, but adding said document to a collection with an existing schema would cause problems.
+
+#### What happens if you remove the subscription from _/app/imports/ui/pages/ListStuff.jsx_?
+Without the subscription to `Stuff`, the _ListStuff_ page would not have access to the `Stuffs` to display.  You can test what happens in this case on your side.
+
+#### How does the `<Switch>` statement work in _/app/imports/ui/layouts/App.jsx_?
+
+#### Are the `Route`, `ProtectedRoute`, and `AdminProtectedRoute` components built into Meteor?
+Look through the rest of the file: `Route` is imported from `react-router-dom` and both `ProtectedRoute` and `AdminProtectedRoute` are defined in _App.jsx_.
+
+#### How exactly does `ProtectedRoute` create a new route?
+
+#### How difficult would it be to use another UI framework in Meteor?  
+In theory, not very difficult; in the worst-case scenario where the framework cannot be installed through _npm_ it will still be possible to add the `link` tags into _/app/client/main.html_ manually.
+
+#### Can we just write HTML files in _/app/client_?
+Yes, but if you are only making static web pages with HTML and CSS there is not much point in using Meteor in the first place.
+
+#### Is the landing page basically the home page?
+Yes.
+
+#### What would happen if you removed the `return this.ready()` from the publications?
+The `this.ready()` call signals that the data transfer is complete.  Without this, any subscriptions on the publications would continue to wait for data indefinitely.
+
+#### _/app/client/main.js_ imports _/app/imports/startup/both_, which imports _/app/imports/api/stuff_.  Why not have _/app/client/main.js_ directly import _/app/imports/api/stuff_?  
+_/app/imports/startup/both_ includes files that are required on both the client and server side.  If we skip _/both_ in favor of directly importing files on the client side we would have to do the same on the server side as well, leaving us with duplicate and redundant groups of `import` statements. 
+
+#### What is the relationship between publications and subscriptions?  
+The publication on the server side provides the data; the subscription on the server side receives the data.  By analogy, Dr. Johnson publishes a screencast and you subscribe to it (in the form of watching the video).
+
+#### Are there any restrictions on the components we can create?
+None that I am aware of.
+
+#### What does the `render` function do?
+
+#### How do you generate the URL of a `Stuff`?
+
+#### Is it possible to place the header and footer into individual pages rather than in _/app/imports/ui/layouts/App.jsx_?
+Yes, though the question itself hints at why this is a bad idea: you would have to include the header and footer in each page in your application.  Placing the header and footer in _/layouts/App.jsx_ makes the header and footer appear on every page.
+
+#### Why do we split the components on a page across multiple files in Meteor when we did everything in a single file in React?
+
+#### Does Meteor support group roles for users?
+Yes, though it is more accurate to write that `meteor/alanning:roles` provides this; documentation is available [here](https://github.com/alanning/meteor-roles).
+
+#### Is it possible to modify `ProtectedRoute` to only allow users with some combination of roles?
+Yes, though you would have to `&&` the clauses together yourself.
+
+#### How can we easily know what Semantic UI tools are available to us?
+See the [Semantic UI React documentation](https://react.semantic-ui.com/).
+
+
+
+---
+
 ## Footnotes
 <ol>
   <li id="footnote-1">Given the author, these answers are likely to make matters even more confusing.</li>
@@ -111,12 +302,13 @@ Creating data does not inherently protect it from modification by others; if you
     For example, note the judicious use of HTML to work around some of the simplifications inherent to Markdown.
   </li>
   <li id="footnote-3">
-    The correct term for this is <a href="http://www.catb.org/jargon/html/C/cracker.html">cracker</a>, not <a href="http://www.catb.org/jargon/html/H/hacker.html">hacker</a>.
+    Your teaching assistant remembers one instance where two projects both used PostgreSQL and the `Users` table in one project overwrote all the users for the other project.
   </li>
   <li id="footnote-4">
-    Your teaching assistant remembers one instance where two projects both used PostgreSQL and the `Users` table in one project overwrote all the users for the other project.
+    The correct term for this is <a href="http://www.catb.org/jargon/html/C/cracker.html">cracker</a>, not <a href="http://www.catb.org/jargon/html/H/hacker.html">hacker</a>.
   </li>
   <li id="footnote-5">
     It is theoretically possible for two different passwords to have the same hash value; each character in this hashed value can be one of sixty-five characters and the bcrypt value is sixty characters long, so there are 5,953,898,114,759,757,583,498,133,232,325,552,989,993,673,976,517,266,254,986,001,716,363,076,818,883,115,493,008,517,660,200,595,855,712,890,625 possible hash values.  
   </li>
+  <li id="footnote-6">As opposed to fake-life applications.</li>
 </ol>
