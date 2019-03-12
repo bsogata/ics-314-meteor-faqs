@@ -91,7 +91,7 @@ See the [Simple Schema documentation](https://github.com/aldeed/simple-schema-js
 See the documentation for [`Accounts.changePassword`](https://docs.meteor.com/api/passwords.html#Accounts-changePassword). 
 
 #### How are passwords case-sensitive while user names are not?
-See the Meteor notes on [case sensitivity](https://guide.meteor.com/accounts.html#case-sensitivity).
+See the Meteor notes on [case sensitivity](https://guide.meteor.com/accounts.html#case-sensitivity).  In other systems that do not provide helper methods to take care of this, you might convert the usernames or email addresses to lowercase before saving them or comparing them to values in the database.
 
 #### What is that `"verified" : false` in the "emails" field?  How do we change that value?
 This indicates that the email address has not been verified yet: it may be a valid email address but we do not know that it actually exists and belongs to the user.  [`Accounts.sendVerificationEmail`](https://docs.meteor.com/api/passwords.html#Accounts-sendVerificationEmail) allows us to start that verification process.
@@ -355,6 +355,50 @@ In theory, not very difficult; in the worst-case scenario where the framework ca
 Although the pages _look_ the same, they serve different roles.  
 
 #### What is the `model={this.props.doc}` attribute in the `AutoForm` in _/app/imports/ui/pages/EditStuff.jsx_?
+
+#### Can we show an error message (perhaps using Bert alerts) when the user attempts to access an admin page instead of redirecting to the signin page?
+
+#### How are we able to use `ProtectedRoute` and `AdminProtectedRoute` in the same way as a React component when they do not extend `React.Component`?
+Although neither `ProtectedRoute` or `AdminProtectedRoute` extend `React.Component`, they are functions that _return_ a `Route`, which is a component we can use in the `render` method.
+
+#### Are React and Meteor related, and if so what is that relationship?
+
+#### How would we add more sophisticated login processes (ex. multi-factor authentication, CAPTCHA)?
+
+#### Should a user be able to see that someone else has modified an item that he or she owns?
+Maybe?
+
+#### Can users specify the unit of measurement (ex. for the quantity in the sample application)?
+You could do this with another field in the document and a corresponding `input` in the form.
+
+#### Does Meteor + MongoDB allow users to create immutable data?
+
+#### Are there roles that allow the user to view or modify the source code for the website?
+Yes, you can add them as a collaborator on the project on GitHub.
+
+#### In Meteor, you jerk.
+No, not to my knowledge.
+
+#### Can users change the roles of other users?
+
+#### What happens when you forget your password?
+The answer to this depends on how much the IT staff likes you.
+
+#### Why are `ProtectedRoute` and `AdminProtectedRoute` separate?
+
+#### Can we make routes that are visible to regular users but not admins?
+Yes, you would just have to write conditional logic to prevent admins from seeing those pages.
+
+#### Are there alternatives to `meteor/accounts-base` and `meteor/alanning:roles`?  Why did we choose this combination of libraries?  Are there benefits to using any alternatives that may exist?
+
+#### How would we record IP addresses for logins?
+
+#### Is `ProtectedRoute` similar to the `protected` header in C++?
+
+#### What is the difference between _/app/client_ and _/app/imports/startup/client_?  _/app/server_ and _/app/imports/startup/server_?
+
+#### If there are multiple admins, can each admin see the `Stuff`s associated with other admins?
+Yes, the _ListStuffAdmin_ page displays everything in the `Stuffs` collection.
 
 ---
 
