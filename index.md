@@ -1,3 +1,8 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+
+
 # ICS 314 Meteor FAQs
 
 This page is intended to answer questions about Meteor for ICS 314 Spring 2019<sup><a href="#footnote-1">1</a></sup>.  This also serves the secondary purpose of providing an example of how to use GitHub Pages<sup><a href="#footnote-2">2</a></sup>.
