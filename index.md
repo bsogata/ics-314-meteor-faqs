@@ -310,6 +310,9 @@ Yes, though it is more accurate to write that `meteor/alanning:roles` provides t
 #### What prevents users from accessing admin pages?  
 _/app/imports/ui/layouts/App.jsx_ uses `AdminProtectedRoute` for the admin page.  `AdminProtectdRoute` redirects the user to the signin page if the current user is not an admin (the `isLogged && isAdmin`).  Consequently, the current user must be an admin to access the page even if the user has typed in the URL of the admin page manually.
 
+#### If there are multiple admins, can each admin see the `Stuff`s associated with other admins?
+Yes, the _ListStuffAdmin_ page displays everything in the `Stuffs` collection.
+
 ---
 
 ## <span id="misc">Miscellaneous Questions</span>
@@ -352,11 +355,16 @@ In theory, not very difficult; in the worst-case scenario where the framework ca
 ~~It is the only one named Meteor.~~
 
 #### The _Add Stuff_ and _Edit Stuff_ pages are essentially the same; why do we need two separate pages to do the same thing?
-Although the pages _look_ the same, they serve different roles.  
+Although the pages _look_ the same, they serve different roles.  _Add Stuff_ creates an entirely new `Stuff` whereas _Edit Stuff_ modifies an existing `Stuff`.  One uses `insert` while the other uses `update`.  If you made a single page for both tasks, you would have to perform some conditional logic to set up the form for the correct operation and that would be more complex than just having two separate pages/
+
+Separating the _add_ and _edit_ processes also matches the [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations.
+
+With that being written, it is perfectly valid to argue that while the _pages_ may have different purposes the _forms_ within those pages are nearly identical.  It would then be reasonable to extract the form fields into a new component that you could then use in both _AddStuff.jsx_ and _EditStuff.jsx_.
 
 #### What is the `model={this.props.doc}` attribute in the `AutoForm` in _/app/imports/ui/pages/EditStuff.jsx_?
 
 #### Can we show an error message (perhaps using Bert alerts) when the user attempts to access an admin page instead of redirecting to the signin page?
+Yes.
 
 #### How are we able to use `ProtectedRoute` and `AdminProtectedRoute` in the same way as a React component when they do not extend `React.Component`?
 Although neither `ProtectedRoute` or `AdminProtectedRoute` extend `React.Component`, they are functions that _return_ a `Route`, which is a component we can use in the `render` method.
@@ -366,7 +374,7 @@ Although neither `ProtectedRoute` or `AdminProtectedRoute` extend `React.Compone
 #### How would we add more sophisticated login processes (ex. multi-factor authentication, CAPTCHA)?
 
 #### Should a user be able to see that someone else has modified an item that he or she owns?
-Maybe?
+This would depend on the application.
 
 #### Can users specify the unit of measurement (ex. for the quantity in the sample application)?
 You could do this with another field in the document and a corresponding `input` in the form.
@@ -397,8 +405,7 @@ Yes, you would just have to write conditional logic to prevent admins from seein
 
 #### What is the difference between _/app/client_ and _/app/imports/startup/client_?  _/app/server_ and _/app/imports/startup/server_?
 
-#### If there are multiple admins, can each admin see the `Stuff`s associated with other admins?
-Yes, the _ListStuffAdmin_ page displays everything in the `Stuffs` collection.
+
 
 ---
 
