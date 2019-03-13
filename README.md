@@ -27,7 +27,7 @@ The aforementioned GitHub Pages site is available at [https://bsogata.github.io/
    
   * Type a _Description_ for the issue; this can be a longer message detailing exactly what the problem is
   
-  <img src="/doc/issue_title.png" alt="Issue Description" />
+  <img src="/doc/issue_description.png" alt="Issue Description" />
 
   * Click on **Assignees** and assign **bsogata** to the issue
   
