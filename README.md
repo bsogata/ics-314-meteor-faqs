@@ -35,7 +35,7 @@ The aforementioned GitHub Pages site is available at [https://bsogata.github.io/
      
   * Click on **Labels** and select the label or labels that best describe the issue 
 
-  <img src="/doc/issue_assignee.png" alt="Issue Labels" />
+  <img src="/doc/issue_label.png" alt="Issue Labels" />
 
   * Verify that all of the information is correct, then click the **Submit new issue** button 
 
