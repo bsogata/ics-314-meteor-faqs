@@ -2,7 +2,6 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 
-
 # ICS 314 Meteor FAQs
 
 This page is intended to answer questions about Meteor for ICS 314 Spring 2019<sup><a href="#footnote-1">1</a></sup>.  This also serves the secondary purpose of providing an example of how to use GitHub Pages<sup><a href="#footnote-2">2</a></sup>.
@@ -15,6 +14,23 @@ This page is intended to answer questions about Meteor for ICS 314 Spring 2019<s
 5. <a href="#roles">Authorization, Authentication, and Roles</a>
 6. <a href="#misc">Miscellaneous Questions</a>
 7. <a href="#unanswered">Unanswered and Unclassified Questions</a>
+
+<div class="ui card">
+  <div class="content">
+    <div class="header">Walkthrough of System User Interface</div>
+  </div>
+  <div class="content">
+    <div class="ui accordion">
+      <div class="title">
+        <i class="dropdown icon" />
+        Since the initial passwords for the template are stored in plain text in _/config/settings.development.json_, should projects based on this template be stored in a private repository?
+      </div>
+      <div class="content">
+        Yes; you should make repositories private unless there is some compelling reason for them to be public.  (Those of you who took my ICS 111 will recall taking a similar approach to `public` and `private` instance variables.)
+      </div>
+    </div>
+  </div>
+</div>
 
 ## <span id="project-structure">Walkthrough of System User Interface</span>
 #### Since the initial passwords for the template are stored in plain text in _/config/settings.development.json_, should projects based on this template be stored in a private repository?
